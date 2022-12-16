@@ -1,5 +1,5 @@
 import { addHours, differenceInSeconds } from 'date-fns';
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 
 import Modal from 'react-modal';
 import Swal from 'sweetalert2';
@@ -10,6 +10,7 @@ import DatePicker, { registerLocale  } from "react-datepicker";
 import es from 'date-fns/locale/es';
 import "react-datepicker/dist/react-datepicker.css";
 import { useUiStore } from '../../hooks/useUiStore';
+import { useCalendarStore } from '../../hooks';
 
 
 registerLocale('es', es)
@@ -32,14 +33,15 @@ const customStyles = {
 
 export const CalendarModal = () => {
 
-    const { isDateModalOpen, closeDateModal } = useUiStore()
+    const { isDateModalOpen, closeDateModal } = useUiStore();
 
-    
+    const { activeEvent, startSavingEvent } = useCalendarStore();
+
     const [formSubmitted, setFormSubmitted] = useState(false);
 
     const [formValues, setFormValues] = useState({
-        title: 'Facundo',
-        notes: 'Marino',
+        title: '',
+        notes: '',
         start: new Date(),
         end: addHours( new Date(), 2)
     });
@@ -51,7 +53,16 @@ export const CalendarModal = () => {
         ? ''
         : 'is-invalid'
 
-    }, [formValues.title, formSubmitted])
+    }, [formValues.title, formSubmitted]);
+
+
+    useEffect(() => {
+        
+        if( activeEvent !== null){
+            setFormValues({ ...activeEvent })
+        }
+
+    }, [ activeEvent ]);
 
     const closeModalHandler = () => {
         closeDateModal()
@@ -74,7 +85,7 @@ export const CalendarModal = () => {
 
     };
 
-    const submitHandler = ( event ) => {
+    const submitHandler = async( event ) => {
 
         event.preventDefault();
         setFormSubmitted(true)
@@ -86,9 +97,12 @@ export const CalendarModal = () => {
             return;
         }
 
-        if( formValues.title <= 0 ){
-            return;
-        }
+        if( formValues.title.length <= 0 ) return;
+        
+
+        await startSavingEvent( formValues );
+        closeDateModal();
+        setFormSubmitted(false)
       }
 
   return (
