@@ -9,6 +9,7 @@ import {
 	FabAddNew,
 	FabDelete,
 } from '../components';
+
 import { localizer, getMessagesES } from '../../helpers';
 import { useUiStore, useCalendarStore, useAuthStore } from '../../hooks';
 
@@ -34,10 +35,11 @@ export const CalendarPage = () => {
 	);
 
 	const eventStyleGetter = (event, start, end, isSelected) => {
-		const isMyEvent = user.id === event.user._id || user.id === event.user.id;
+		const isMyEvent =
+			user.uid === event.user._id || user.uid === event.user.uid;
 
 		const style = {
-			backgroundColor: isMyEvent ? '#347CF7' : '#4656060',
+			backgroundColor: isMyEvent ? '#347CF7' : '#444543',
 			borderRadius: '0px',
 			opacity: 0.8,
 			color: 'white',
