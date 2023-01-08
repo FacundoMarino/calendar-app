@@ -1,9 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { addHours } from 'date-fns';
 
 export const calendarSlice = createSlice({
 	name: 'calendar',
 	initialState: {
+		isLoadingEvents: true,
 		events: [],
 		activeEvent: null,
 	},
@@ -19,7 +19,7 @@ export const calendarSlice = createSlice({
 
 		onUpdateEvent: (state, { payload }) => {
 			state.events = state.events.map((event) => {
-				if (event._id === payload._id) {
+				if (event.id === payload.id) {
 					return payload;
 				}
 
@@ -29,12 +29,34 @@ export const calendarSlice = createSlice({
 
 		onDeleteEvent: (state) => {
 			state.events = state.events.filter(
-				(event) => event._id !== state.activeEvent._id
+				(event) => event.id !== state.activeEvent.id
 			);
+			state.activeEvent = null;
+		},
+
+		onLoadEvent: (state, { payload = [] }) => {
+			state.isLoadingEvents = false;
+			payload.forEach((event) => {
+				const exists = state.events.some((dbEvent) => dbEvent.id === event.id);
+				if (!exists) {
+					state.events.push(event);
+				}
+			});
+		},
+
+		onLogoutCalendar: (state) => {
+			state.isLoadingEvents = true;
+			state.events = [];
 			state.activeEvent = null;
 		},
 	},
 });
 
-export const { onSetActiveNote, onAddNewEvent, onUpdateEvent, onDeleteEvent } =
-	calendarSlice.actions;
+export const {
+	onAddNewEvent,
+	onDeleteEvent,
+	onLoadEvent,
+	onLogoutCalendar,
+	onSetActiveNote,
+	onUpdateEvent,
+} = calendarSlice.actions;
